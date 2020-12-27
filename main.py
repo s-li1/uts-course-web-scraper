@@ -16,7 +16,6 @@ def scrapeSubject(url, course):
     subjects = soup.find('div',attrs={"class":"ie-images"})
     subjects.find('h1').decompose()
     for elementP in subjects.find_all('p'):
-      print(elementP)
       elementP.decompose()
 
     # Grabs links
@@ -30,10 +29,10 @@ def scrapeSubject(url, course):
 
     # Gets only the subject names
     for elementA in subjects.find_all('a'):
-      print(elementA)
+
       elementA.decompose()
     
-    # Regular Expressions to fix formatting
+    # Regular Expressions to regulate formatting
     linkTags = str(linkTags).replace('u\'', '\'').replace('\'', '').strip('][').split(', ')
     subjects = str(subjects.text)
     finalText = re.split("[\r\n]+", subjects)
@@ -48,6 +47,7 @@ def scrapeSubject(url, course):
     for (subjectID, name,link) in zip(idList, finalText, linkTags):
       subjectDescription = descriptionScrape(link)
       single = {'id': subjectID, 'name': name, 'link': link, 'description': subjectDescription }
+      print(single);
       result.append(single)
       with open(f'{course}.json','w') as f:
         json.dump(result,f,indent=4)
@@ -63,11 +63,9 @@ def descriptionScrape(link):
   try:
     soup = soup.select('h3 + p')[0]
     description = str(soup.text)
-    # print(description)
     return description
   except:
     description = "This subject does not have a description."
-    # print("This subject does not have a description.")
   
   return description
 
@@ -79,15 +77,13 @@ def majorScrape(link, major):
   # Grabs all subject links
   subjectLinks = soup.find('table')
   linkTags = [a.get('href') for a in subjectLinks.find_all('a', href=True)]
-  print(linkTags)
   #Grab subject iDs
   linkiDs = []
   for iD in subjectLinks.find_all('a'):
       linkiDs.append(iD.text)
-  print(linkiDs)
 
   #Remove subject links and only get subject Name
-  #try except state, if a link is not found it might not be a subject major and just a line of text so we can remove it.
+  #if a link is not found it might not be a subject major and just a line of text so we can remove it.
   subjectNames = soup.select('td:nth-child(1)')
   majorSubjectList = []
   for subject in subjectNames:
@@ -96,7 +92,6 @@ def majorScrape(link, major):
       majorSubjectList.append(str(subject.text).replace('\xa0', ''))
     except:
       subject.decompose()
-  print(majorSubjectList)
 
   result = []
   subjectDescription = None
@@ -104,10 +99,10 @@ def majorScrape(link, major):
     subjectDescription = descriptionScrape(link)
     single = {'id': subjectID, 'name': name, 'link': link, 'description': subjectDescription }
     result.append(single)
+    print(single)
     with open(f'major/{major}.json','w') as f:
       json.dump(result,f,indent=4)
 
 
-#scrapeSubject("https://www.handbook.uts.edu.au/it/lists/alpha.html", "ok")
-# descriptionScrape("https://handbook.uts.edu.au/subjects/32998.html")
-majorScrape("https://handbook.uts.edu.au/directory/maj03445.html", "NandC")
+scrapeSubject("https://www.handbook.uts.edu.au/bus/lists/alpha.html", "business")
+# majorScrape("https://handbook.uts.edu.au/directory/maj03445.html", "NandC")
